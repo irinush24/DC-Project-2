@@ -1,0 +1,36 @@
+# Clear and rebuild work library
+if [file exists "work"] {vdel -all}
+vlib work
+
+# Compile source files
+vlog cache_controller.v memory.v
+vlog cache_tb.v
+
+# Start simulator with full signal access enabled
+vsim -voptargs=+acc work.cache_tb
+
+# Group waveforms by module blocks for debugging ease
+add wave -divider "CPU Interface"
+add wave -radix hexadecimal /cache_tb/clk
+add wave -radix hexadecimal /cache_tb/rst_n
+add wave -radix hexadecimal /cache_tb/caddress
+add wave -radix hexadecimal /cache_tb/rden
+add wave -radix hexadecimal /cache_tb/wren
+add wave -radix decimal     /cache_tb/hit
+add wave -radix hexadecimal /cache_tb/cdout
+add wave -radix hexadecimal /cache_tb/cdin
+
+add wave -divider "Internal Cache Controller"
+add wave -radix unsigned    /cache_tb/u_cache/current_state
+add wave -radix hexadecimal /cache_tb/u_cache/hit_way_idx
+add wave -radix hexadecimal /cache_tb/u_cache/victim_way_idx
+
+add wave -divider "Memory Bus Interface"
+add wave -radix hexadecimal /cache_tb/maddress
+add wave -radix decimal     /cache_tb/mrden
+add wave -radix decimal     /cache_tb/mwren
+add wave -radix hexadecimal /cache_tb/mdin
+add wave -radix hexadecimal /cache_tb/mdout
+
+# Run whole test bench duration
+run -all
